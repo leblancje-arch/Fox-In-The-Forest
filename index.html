@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Fox in the Forest · fox.bpl.guru</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%232E4A3B'/%3E%3Cpath d='M4 5l4 4h8l4-4-1 8-7 6-7-6z' fill='none' stroke='%23F2A06B' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   COLOURS & BASICS
+   ============================================================ */
+:root{
+  --bg:#F3ECDF; --panel:#FBF7EF; --line:#E0D5C1; --line2:#C9BBA2;
+  --ink:#22302A; --muted:#5E6B63; --forest:#2E4A3B; --forest2:#3F5F4D;
+  --p1:#C4571F; --p1-soft:#F7E3D3; --p1-dark:#9A4418; --p1-light:#F2A06B;
+  --p2:#2F5378; --p2-soft:#DCE6F0; --p2-light:#A9C4E4;
+  --display:'Fraunces',Georgia,serif; --body:'Figtree',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased}
+a{color:var(--forest)} a:hover{color:var(--p1)}
+.wrap{max-width:1280px;margin:0 auto}
+h2{margin:0;font-family:var(--display);font-size:30px;font-weight:600}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:32px 36px}
+.muted{color:var(--muted)}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.row-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:20px}
+
+/* Header */
+header{display:flex;align-items:center;justify-content:space-between;padding:28px 64px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:48px;height:48px;border-radius:12px;background:var(--forest);color:var(--bg);display:flex;align-items:center;justify-content:center}
+.brand-name{font-family:var(--display);font-size:24px;font-weight:600;letter-spacing:-.01em}
+.brand-sub{font-size:13px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+nav{display:flex;align-items:center;gap:24px;font-size:15px;font-weight:500}
+nav a{text-decoration:none}
+.pill-link{padding:10px 16px;border:1px solid var(--line2);border-radius:999px}
+select{font:inherit;font-size:15px;font-weight:600;padding:9px 12px;border-radius:999px;border:1px solid var(--line2);background:var(--panel);color:var(--ink)}
+
+main{display:flex;flex-direction:column;gap:40px;padding:40px 64px 56px}
+.banner{padding:14px 18px;border-radius:12px;font-size:15px}
+.banner.info{background:var(--p2-soft);color:#1E3A57}
+.banner.err{background:#F6D9D2;color:#7A2414}
+
+/* Scoreboard */
+.scoreboard{background:var(--forest);color:var(--bg);border-radius:24px;padding:40px 56px;display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;gap:24px}
+.side{display:flex;flex-direction:column;gap:8px}
+.side.right{align-items:flex-end;text-align:right}
+.badge-slot{height:27px}
+.badge{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:#E07A3E;color:#1D2A22;padding:5px 10px;border-radius:999px}
+.badge.p2{background:var(--p2-light)}
+.pname{font-family:var(--display);font-size:40px;font-weight:600}
+.wins{display:flex;align-items:baseline;gap:10px}
+.big{font-family:var(--display);font-size:120px;line-height:1;font-weight:800}
+.wins span.lbl,.rating-line{font-size:17px;color:#C9D3CB}
+.rating-line strong{color:var(--bg)}
+.center{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.vs{font-family:var(--display);font-size:56px;font-style:italic;font-weight:400}
+.headline{font-size:19px;font-weight:600}
+.subline{font-size:14px;color:#C9D3CB}
+.progress{width:280px;height:6px;background:var(--forest2);border-radius:3px;overflow:hidden}
+.progress div{height:6px;background:var(--p1-light)}
+
+/* Chart */
+.toggle{display:flex;gap:4px;padding:4px;background:#EDE4D3;border-radius:999px}
+.toggle button{border:0;cursor:pointer;font:inherit;font-size:14px;font-weight:600;padding:12px 18px;min-height:44px;border-radius:999px;background:transparent;color:#3B4A42}
+.toggle button.on{background:var(--forest);color:var(--bg)}
+#chart svg{display:block;width:100%;height:auto}
+#chart svg text{font-family:var(--body)}
+.legend{display:flex;gap:24px;font-size:14px;color:var(--muted);margin-top:16px}
+.legend span{display:flex;align-items:center;gap:8px}
+.dot{width:12px;height:12px;border-radius:6px;display:inline-block;flex-shrink:0}
+.empty{padding:60px 0;text-align:center;color:var(--muted);font-size:16px}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:10px}
+.stat .eyebrow{display:flex;align-items:center;gap:8px}
+.stat .val{font-family:var(--display);font-size:40px;font-weight:600;display:flex;gap:20px;align-items:baseline}
+.stat .sub{font-size:14px;color:var(--muted)}
+
+/* Months */
+.months{display:grid;grid-template-columns:repeat(12,1fr);gap:10px}
+.month{display:flex;flex-direction:column;gap:6px;padding:14px 12px;border-radius:12px;background:var(--bg);color:var(--muted);border:1px dashed var(--line2)}
+.month .m{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.month .r{font-family:var(--display);font-size:19px;font-weight:600}
+.month .s{font-size:12px}
+.month.p1{background:var(--p1-soft);color:#7A3612;border:1px solid var(--p1)}
+.month.p2{background:var(--p2-soft);color:#1E3A57;border:1px solid var(--p2)}
+.month.split{background:#ECE6D8;color:var(--ink);border:1px solid var(--line2)}
+.month.live{border-width:2px;border-style:solid}
+
+/* Log + hall */
+.lower{display:grid;grid-template-columns:2fr 1fr;gap:24px;align-items:start}
+.log-grid{display:grid;grid-template-columns:90px minmax(0,1fr) 110px 90px;gap:12px;align-items:center}
+.log-head{padding:0 12px 8px;border-bottom:1px solid var(--line);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.log-row{padding:12px;border-radius:10px;font-size:16px}
+.log-row:nth-child(even){background:#F5EEE2}
+.log-row .w{display:flex;align-items:center;gap:10px;font-weight:600}
+.log-row .sc{font-family:var(--display);font-size:18px;font-weight:600}
+.r-align{text-align:right}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--p1-dark);background:var(--p1-soft);padding:3px 8px;border-radius:999px}
+.hall{background:var(--forest);color:var(--bg);border-radius:20px;padding:32px;display:flex;flex-direction:column;gap:16px}
+.champ{border:1px dashed #6F8B7A;border-radius:14px;padding:20px 24px;display:flex;flex-direction:column;gap:6px;text-align:center}
+.champ.won{border-style:solid;border-color:var(--p1-light)}
+.champ .yr{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#C9D3CB}
+.champ .who{font-family:var(--display);font-size:26px}
+.champ .rec{font-size:14px;color:#C9D3CB}
+.rules h3{margin:0 0 12px;font-family:var(--display);font-size:22px;font-weight:600}
+.rules ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:15px;line-height:1.5;color:#3B4A42}
+
+footer{padding:24px 64px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="brand">
+    <div class="logo"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M3 4l5 5h8l5-5-1 9-8 7-8-7z"/><path d="M9 13l1.5 1.5M15 13l-1.5 1.5"/><path d="M11 17h2"/></svg></div>
+    <div>
+      <div class="brand-name">The Fox in the Forest</div>
+      <div class="brand-sub">A head-to-head rivalry · fox.bpl.guru</div>
+    </div>
+  </div>
+  <nav>
+    <a href="#race">The Race</a>
+    <a href="#log">Game Log</a>
+    <a href="#hall">Hall of Champions</a>
+    <label class="muted" for="season" style="display:none">Season</label>
+    <select id="season" aria-label="Season"></select>
+    <a class="pill-link" href="https://bpl.guru">← Back to BPL</a>
+  </nav>
+</header>
+
+<main>
+  <div id="banner"></div>
+
+  <section class="scoreboard" id="scoreboard"></section>
+
+  <section class="panel" id="race">
+    <div class="row-head">
+      <div>
+        <h2>The Race</h2>
+        <p class="muted" id="chart-blurb" style="margin:6px 0 0;font-size:15px"></p>
+      </div>
+      <div class="toggle" role="group" aria-label="Chart view">
+        <button id="btn-race" class="on" type="button">Season lead</button>
+        <button id="btn-power" type="button">Power Rating</button>
+      </div>
+    </div>
+    <div id="chart"></div>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--p1)"></i><b class="leg1" style="font-weight:400">Jeff win</b></span>
+      <span><i class="dot" style="background:var(--p2)"></i><b class="leg2" style="font-weight:400">Alexandros win</b></span>
+    </div>
+  </section>
+
+  <section class="stats" id="stats"></section>
+
+  <section class="panel">
+    <div class="row-head">
+      <h2>Month by Month</h2>
+      <span class="muted" style="font-size:14px">Bragging rights, one month at a time</span>
+    </div>
+    <div class="months" id="months"></div>
+  </section>
+
+  <section class="lower">
+    <div class="panel" id="log">
+      <div class="row-head">
+        <h2>Game Log</h2>
+        <span class="muted" style="font-size:14px" id="log-count"></span>
+      </div>
+      <div class="log-grid log-head"><span>Date</span><span>Winner</span><span>Score</span><span class="r-align">Rating</span></div>
+      <div id="log-rows"></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <div class="hall" id="hall"></div>
+      <div class="panel rules">
+        <h3>House rules</h3>
+        <ul id="rules"></ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>A sister site of the Backgammon Premier League</span>
+  <span id="updated"></span>
+</footer>
+</div>
+
+<script>
+/* ============================================================
+   SETTINGS — the only part you should ever need to edit
+   ============================================================ */
+const CONFIG = {
+  // Paste your published Google Sheet CSV link between the quotes.
+  // It must end in  output=csv  (NOT pubhtml). Leave empty to show sample data.
+  CSV_URL: '',
+
+  P1: 'Jeff',         // column header in the sheet for your score
+  P2: 'Alexandros',   // column header for Alex's score
+  P2_SHORT: 'Alex',   // short name used in a few tight spots
+
+  START_RATING: 1500, // Power Rating everyone starts each season on
+  K: 32,              // how much one game can move the rating
+  BLOWOUT: 13,        // winning by this many or more earns the fox "Blowout" tag
+  SEASON_START_MONTH: 9 // September
+};
+
+/* Sample games — only used while CSV_URL is empty */
+const SAMPLE = [
+  ['9/2/2026',21,14],['9/4/2026',9,22],['9/6/2026',21,20],['9/9/2026',24,6],
+  ['9/11/2026',18,21],['9/13/2026',12,21],['9/16/2026',20,23],['9/19/2026',21,3],
+  ['9/21/2026',21,17],['9/23/2026',22,19],['9/26/2026',8,21]
+];
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAY = 86400000;
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = d => MONTHS[d.getMonth()] + ' ' + d.getDate();
+const nameOf = w => w === 1 ? CONFIG.P1 : CONFIG.P2;
+const shortOf = w => w === 1 ? CONFIG.P1 : CONFIG.P2_SHORT;
+const colorOf = w => w === 1 ? 'var(--p1)' : 'var(--p2)';
+
+function parseCSV(text){
+  const rows = []; let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++){
+    const c = text[i];
+    if (q){
+      if (c === '"' && text[i+1] === '"'){ cell += '"'; i++; }
+      else if (c === '"') q = false;
+      else cell += c;
+    } else if (c === '"') q = true;
+    else if (c === ',') { row.push(cell); cell = ''; }
+    else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
+    else if (c !== '\r') cell += c;
+  }
+  if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+  return rows;
+}
+
+function parseDate(s){
+  s = String(s || '').trim(); let m;
+  if ((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return new Date(+m[1], m[2]-1, +m[3], 12);
+  if ((m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/))){
+    let y = +m[3]; if (y < 100) y += 2000;
+    return new Date(y, m[1]-1, +m[2], 12);
+  }
+  const d = new Date(s);
+  return isNaN(d) ? null : new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12);
+}
+
+function rowsToGames(rows){
+  // Find the header row (the one with a "Date" cell); skip any title rows above it.
+  let h = rows.findIndex(r => r.some(c => c.trim().toLowerCase() === 'date'));
+  let iD = 0, i1 = 1, i2 = 2;
+  if (h >= 0){
+    const hdr = rows[h].map(c => c.trim().toLowerCase());
+    iD = hdr.indexOf('date');
+    const f1 = hdr.findIndex(c => c && c.includes(CONFIG.P1.toLowerCase()));
+    const f2 = hdr.findIndex(c => c && (c.includes(CONFIG.P2.toLowerCase()) || c.includes(CONFIG.P2_SHORT.toLowerCase())));
+    if (f1 >= 0) i1 = f1; if (f2 >= 0) i2 = f2;
+  }
+  const games = [];
+  rows.slice(h + 1).forEach((r, idx) => {
+    const date = parseDate(r[iD]);
+    const s1 = parseInt(r[i1], 10), s2 = parseInt(r[i2], 10);
+    if (!date || isNaN(s1) || isNaN(s2) || s1 === s2) return;   // skip blank / bad rows
+    games.push({ date, s1, s2, order: idx });
+  });
+  return games;
+}
+
+/* Season = Sep 1 → Aug 31, identified by the year it starts */
+function seasonOf(d){
+  const sm = CONFIG.SEASON_START_MONTH - 1;
+  return d.getMonth() >= sm ? d.getFullYear() : d.getFullYear() - 1;
+}
+const seasonLabel = y => y + '–' + String(y + 1).slice(2);
+const seasonStart = y => new Date(y, CONFIG.SEASON_START_MONTH - 1, 1, 0);
+const seasonEnd = y => new Date(y + 1, CONFIG.SEASON_START_MONTH - 1, 0, 23, 59, 59); // last day before next start
+
+/* ============================================================
+   THE MATHS
+   ============================================================ */
+function computeSeason(games){
+  const g = games.slice().sort((a,b) => a.date - b.date || a.order - b.order);
+  let r1 = CONFIG.START_RATING, r2 = CONFIG.START_RATING, lead = 0, w1 = 0, w2 = 0;
+  const series = [{ lead: 0, r1, r2 }];
+  g.forEach(x => {
+    x.winner = x.s1 > x.s2 ? 1 : 2;
+    x.margin = Math.abs(x.s1 - x.s2);
+    const e1 = 1 / (1 + Math.pow(10, (r2 - r1) / 400));   // P1's expected result
+    const mult = Math.min(2, 1 + x.margin / 21);            // 1× for a 1-point win, up to 2× for a rout
+    const d = Math.round(CONFIG.K * (x.winner === 1 ? (1 - e1) : e1) * mult);
+    if (x.winner === 1){ r1 += d; r2 -= d; lead++; w1++; } else { r1 -= d; r2 += d; lead--; w2++; }
+    x.delta = d; x.r1 = r1; x.r2 = r2; x.lead = lead;
+    series.push({ lead, r1, r2 });
+  });
+
+  // streaks
+  const runs = [];
+  g.forEach(x => {
+    const last = runs[runs.length - 1];
+    if (last && last.w === x.winner){ last.len++; last.end = x.date; }
+    else runs.push({ w: x.winner, len: 1, start: x.date, end: x.date });
+  });
+  const cur = runs[runs.length - 1] || null;
+  const prev = runs.length > 1 ? runs[runs.length - 2] : null;
+  const longestLen = runs.reduce((m, r) => Math.max(m, r.len), 0);
+  const longest = [1,2].map(w => runs.filter(r => r.w === w && r.len === longestLen).pop()).filter(Boolean);
+
+  // blowout: biggest margin (most recent if tied)
+  let blow = null;
+  g.forEach(x => { if (!blow || x.margin >= blow.margin) blow = x; });
+
+  const avg = w => {
+    const m = g.filter(x => x.winner === w).map(x => x.margin);
+    return m.length ? (m.reduce((a,b) => a+b, 0) / m.length).toFixed(1) : '–';
+  };
+
+  return { games: g, series, r1, r2, w1, w2, cur, prev, longestLen, longest, blow, avg1: avg(1), avg2: avg(2) };
+}
+
+function championOf(s){
+  if (!s.games.length) return 0;
+  if (s.w1 !== s.w2) return s.w1 > s.w2 ? 1 : 2;
+  return s.r1 >= s.r2 ? 1 : 2; // level record → higher Power Rating
+}
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+const ICON = {
+  bell: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0112 0v5l2 2H4z"/><path d="M10 20a2 2 0 004 0"/></svg>',
+  key: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M21 12v2"/></svg>',
+  fox: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 4l5 5h8l5-5-1 9-8 7-8-7z"/></svg>',
+  moon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 119.5 4a6.5 6.5 0 0010.5 10.5z"/></svg>'
+};
+
+let STATE = { all: [], seasons: {}, year: null, view: 'race' };
+
+function renderScoreboard(y, s){
+  const today = new Date();
+  const start = seasonStart(y), end = seasonEnd(y);
+  const total = Math.round((end - start) / DAY);
+  const done = today > end;
+  const day = Math.max(0, Math.min(total, Math.floor((today - start) / DAY) + 1));
+  const leader = s.w1 === s.w2 ? 0 : (s.w1 > s.w2 ? 1 : 2);
+  const champ = championOf(s);
+
+  let headline;
+  if (done && champ) headline = nameOf(champ) + ' is the ' + seasonLabel(y) + ' champion';
+  else if (!s.games.length) headline = 'No games yet — deal the first hand';
+  else if (!leader) headline = 'All square at ' + s.w1 + '–' + s.w2;
+  else headline = nameOf(leader) + ' leads the season ' + Math.max(s.w1,s.w2) + '–' + Math.min(s.w1,s.w2);
+
+  const sub = done
+    ? 'Final record ' + s.w1 + '–' + s.w2 + ' · Season complete'
+    : 'Day ' + day + ' of ' + total + ' · Champion crowned ' + fmt(end) + ', ' + end.getFullYear();
+  const pct = done ? 100 : (day / total * 100);
+  const badge = w => {
+    if (done && champ === w) return '<span class="badge' + (w===2?' p2':'') + '">Champion</span>';
+    if (!done && leader === w) return '<span class="badge' + (w===2?' p2':'') + '">Leading</span>';
+    return '';
+  };
+
+  $('scoreboard').innerHTML = `
+    <div class="side">
+      <div class="badge-slot">${badge(1)}</div>
+      <div class="pname">${esc(CONFIG.P1)}</div>
+      <div class="wins"><span class="big" style="color:var(--p1-light)">${s.w1}</span><span class="lbl">wins</span></div>
+      <div class="rating-line">Power Rating <strong>${s.r1}</strong></div>
+    </div>
+    <div class="center">
+      <div class="subline" style="letter-spacing:.14em;text-transform:uppercase">${seasonLabel(y)} Season</div>
+      <div class="vs">vs</div>
+      <div class="headline">${esc(headline)}</div>
+      <div class="subline">${esc(sub)}</div>
+      <div class="progress"><div style="width:${pct.toFixed(1)}%"></div></div>
+    </div>
+    <div class="side right">
+      <div class="badge-slot">${badge(2)}</div>
+      <div class="pname">${esc(CONFIG.P2)}</div>
+      <div class="wins"><span class="lbl">wins</span><span class="big" style="color:var(--p2-light)">${s.w2}</span></div>
+      <div class="rating-line">Power Rating <strong>${s.r2}</strong></div>
+    </div>`;
+}
+
+function xLabels(g, xAt){
+  // Start + a handful of evenly spaced game dates + last
+  const n = g.length, out = [`<text x="60" y="316" font-size="12" fill="#5E6B63">Start</text>`];
+  const want = Math.min(n, 5);
+  const idx = new Set();
+  for (let k = 1; k <= want; k++) idx.add(Math.round(k * n / want));
+  idx.forEach(i => {
+    const anchor = i === n ? 'end' : 'middle';
+    out.push(`<text x="${xAt(i).toFixed(1)}" y="316" font-size="12" text-anchor="${anchor}" fill="#5E6B63">${fmt(g[i-1].date)}</text>`);
+  });
+  return out.join('');
+}
+
+function renderChart(s){
+  const g = s.games, n = g.length;
+  $('chart-blurb').textContent = STATE.view === 'race'
+    ? `Up a step when ${CONFIG.P1} wins, down a step when ${CONFIG.P2_SHORT} wins. Whoever is ahead on Aug 31 is champion.`
+    : 'Margin-weighted rating: a 21–3 rout moves the needle far more than a 21–20 squeaker.';
+  $('btn-race').classList.toggle('on', STATE.view === 'race');
+  $('btn-power').classList.toggle('on', STATE.view === 'power');
+  const suffix = STATE.view === 'race' ? ' win' : '';
+  document.querySelector('.leg1').textContent = CONFIG.P1 + suffix;
+  document.querySelector('.leg2').textContent = CONFIG.P2 + suffix;
+  if (!n){ $('chart').innerHTML = '<div class="empty">The race starts with the first game of the season.</div>'; return; }
+
+  const X0 = 60, X1 = 1100, xAt = i => X0 + (X1 - X0) * i / n;
+  const r = n > 80 ? 3 : n > 40 ? 5 : 7;
+  let svg = '';
+
+  if (STATE.view === 'race'){
+    const maxAbs = Math.max(2, ...s.series.map(p => Math.abs(p.lead)));
+    const unit = 130 / maxAbs, yAt = v => 150 - v * unit;
+    const step = Math.max(1, Math.ceil(maxAbs / 5));
+    svg += `<rect x="${X0}" y="10" width="${X1-X0}" height="140" fill="#F7E3D3"/>
+            <rect x="${X0}" y="150" width="${X1-X0}" height="140" fill="#DCE6F0"/>
+            <text x="72" y="32" font-size="13" font-weight="600" fill="#9A4418">${esc(CONFIG.P1.toUpperCase())} AHEAD</text>
+            <text x="72" y="280" font-size="13" font-weight="600" fill="#2F5378">${esc(CONFIG.P2_SHORT.toUpperCase())} AHEAD</text>`;
+    for (let v = step; v <= maxAbs; v += step){
+      [v, -v].forEach(t => {
+        svg += `<line x1="${X0}" y1="${yAt(t)}" x2="${X1}" y2="${yAt(t)}" stroke="#E0D5C1" stroke-dasharray="3 5"/>
+                <text x="48" y="${yAt(t)+4}" font-size="12" text-anchor="end" fill="#5E6B63">+${v}</text>`;
+      });
+    }
+    svg += `<line x1="${X0}" y1="150" x2="${X1}" y2="150" stroke="#22302A" stroke-width="1.5"/>
+            <text x="48" y="154" font-size="12" text-anchor="end" fill="#5E6B63">Even</text>`;
+    svg += `<polyline points="${s.series.map((p,i) => xAt(i).toFixed(1)+','+yAt(p.lead).toFixed(1)).join(' ')}" fill="none" stroke="#22302A" stroke-width="3" stroke-linejoin="round"/>`;
+    g.forEach((x, i) => {
+      const last = i === n - 1;
+      svg += `<circle cx="${xAt(i+1).toFixed(1)}" cy="${yAt(x.lead).toFixed(1)}" r="${last ? r+2 : r}" fill="${x.winner===1?'#C4571F':'#2F5378'}" stroke="${last?'#22302A':'#FBF7EF'}" stroke-width="2"><title>${fmt(x.date)}: ${esc(nameOf(x.winner))} ${Math.max(x.s1,x.s2)}–${Math.min(x.s1,x.s2)}</title></circle>`;
+    });
+  } else {
+    const vals = s.series.flatMap(p => [p.r1, p.r2]);
+    const step = 20;
+    const lo = Math.floor((Math.min(...vals) - 5) / step) * step;
+    const hi = Math.ceil((Math.max(...vals) + 5) / step) * step;
+    const yAt = v => 280 - (v - lo) / (hi - lo) * 260;
+    const gridStep = (hi - lo) / step > 8 ? step * Math.ceil((hi - lo) / step / 8) : step;
+    for (let v = lo; v <= hi; v += gridStep){
+      svg += `<line x1="${X0}" y1="${yAt(v)}" x2="${X1}" y2="${yAt(v)}" stroke="${v===CONFIG.START_RATING?'#B9AC95':'#E0D5C1'}" ${v===CONFIG.START_RATING?'':'stroke-dasharray="3 5"'}/>
+              <text x="48" y="${yAt(v)+4}" font-size="12" text-anchor="end" fill="#5E6B63">${v}</text>`;
+    }
+    const line = (key, color, dash) => `<polyline points="${s.series.map((p,i) => xAt(i).toFixed(1)+','+yAt(p[key]).toFixed(1)).join(' ')}" fill="none" stroke="${color}" stroke-width="3" stroke-linejoin="round" ${dash?'stroke-dasharray="8 5"':''}/>`;
+    svg += line('r1', '#C4571F') + line('r2', '#2F5378', true);
+    const y1 = yAt(s.r1), y2 = yAt(s.r2), p1Top = y1 <= y2;
+    svg += `<circle cx="${X1}" cy="${y1}" r="7" fill="#C4571F"/><circle cx="${X1}" cy="${y2}" r="7" fill="#2F5378"/>
+            <text x="${X1-10}" y="${p1Top ? y1-12 : y1+22}" font-size="13" font-weight="700" text-anchor="end" fill="#9A4418">${esc(CONFIG.P1)} ${s.r1}</text>
+            <text x="${X1-10}" y="${p1Top ? y2+22 : y2-12}" font-size="13" font-weight="700" text-anchor="end" fill="#2F5378">${esc(CONFIG.P2)} ${s.r2}</text>`;
+  }
+  svg += xLabels(g, xAt);
+  $('chart').innerHTML = `<svg viewBox="0 0 1136 330" role="img" aria-label="Season chart">${svg}</svg>`;
+}
+
+function renderStats(s){
+  const card = (icon, label, val, sub) => `
+    <div class="stat"><div class="eyebrow">${icon}${label}</div><div class="val">${val}</div><div class="sub">${sub}</div></div>`;
+  let curVal = '–', curSub = 'No games yet';
+  if (s.cur){
+    curVal = `<span style="color:${colorOf(s.cur.w)}">${esc(shortOf(s.cur.w))} · W${s.cur.len}</span>`;
+    curSub = s.prev && s.prev.len >= 2
+      ? `Snapped ${esc(shortOf(s.prev.w))}'s ${s.prev.len}-game run on ${fmt(s.cur.start)}`
+      : `Since ${fmt(s.cur.start)}`;
+  }
+  let longVal = '–', longSub = 'No games yet';
+  if (s.longest.length){
+    longVal = s.longestLen + (s.longestLen === 1 ? ' game' : ' games');
+    const span = r => r.len === 1 ? fmt(r.start) : fmt(r.start) + '–' + fmt(r.end);
+    longSub = s.longest.length === 2
+      ? `Shared — ${esc(shortOf(1))} (${span(s.longest[0])}), ${esc(shortOf(2))} (${span(s.longest[1])})`
+      : `${esc(nameOf(s.longest[0].w))} · ${span(s.longest[0])}`;
+  }
+  let blowVal = '–', blowSub = 'No games yet';
+  if (s.blow){
+    const b = s.blow;
+    blowVal = `<span style="color:${colorOf(b.winner)}">${Math.max(b.s1,b.s2)}–${Math.min(b.s1,b.s2)}</span>`;
+    blowSub = `${esc(shortOf(b.winner))} over ${esc(shortOf(b.winner===1?2:1))} · ${fmt(b.date)} · ±${b.delta} rating`;
+  }
+  $('stats').innerHTML =
+    card(ICON.bell, 'Current streak', curVal, curSub) +
+    card(ICON.key, 'Longest streak', longVal, longSub) +
+    card(ICON.fox, 'Biggest blowout', blowVal, blowSub) +
+    card(ICON.moon, 'Avg winning margin',
+      `<span style="color:var(--p1)">${s.avg1}</span><span style="color:var(--p2)">${s.avg2}</span>`,
+      `${esc(shortOf(1))} vs ${esc(shortOf(2))}, points per win`);
+}
+
+function renderMonths(y, s){
+  const today = new Date();
+  let html = '';
+  for (let k = 0; k < 12; k++){
+    const m = (CONFIG.SEASON_START_MONTH - 1 + k) % 12;
+    const yr = m >= CONFIG.SEASON_START_MONTH - 1 ? y : y + 1;
+    const first = new Date(yr, m, 1), last = new Date(yr, m + 1, 0, 23, 59);
+    const inM = s.games.filter(x => x.date >= first && x.date <= last);
+    const a = inM.filter(x => x.winner === 1).length, b = inM.length - a;
+    const live = today >= first && today <= last;
+    let cls = '', r = '—', sub;
+    if (inM.length){
+      if (a > b){ cls = 'p1'; r = `${shortOf(1)} ${a}–${b}`; }
+      else if (b > a){ cls = 'p2'; r = `${shortOf(2)} ${b}–${a}`; }
+      else { cls = 'split'; r = `Split ${a}–${b}`; }
+      sub = live ? 'In progress' : (inM.length + (inM.length === 1 ? ' game' : ' games'));
+    } else sub = today < first ? 'Not yet played' : (live ? 'In progress' : 'No games');
+    html += `<div class="month ${cls} ${live && inM.length ? 'live' : ''}"><div class="m">${MONTHS[m]}</div><div class="r">${esc(r)}</div><div class="s">${sub}</div></div>`;
+  }
+  $('months').innerHTML = html;
+}
+
+function renderLog(s){
+  const g = s.games.slice().reverse();
+  $('log-count').textContent = g.length + (g.length === 1 ? ' game' : ' games') + ' · newest first';
+  $('log-rows').innerHTML = g.length ? g.map(x => `
+    <div class="log-grid log-row">
+      <span class="muted">${fmt(x.date)}</span>
+      <span class="w"><i class="dot" style="background:${colorOf(x.winner)}"></i>${esc(nameOf(x.winner))}
+        ${x.margin >= CONFIG.BLOWOUT ? `<span class="tag">${ICON.fox.replace(/18/g,'13')}Blowout</span>` : ''}</span>
+      <span class="sc">${Math.max(x.s1,x.s2)}–${Math.min(x.s1,x.s2)}</span>
+      <span class="r-align muted" style="font-size:14px">±${x.delta}</span>
+    </div>`).join('') : '<div class="empty">No games logged this season yet.</div>';
+}
+
+function renderHall(){
+  const today = new Date();
+  const years = Object.keys(STATE.seasons).map(Number).sort((a,b) => b - a);
+  const thisYear = seasonOf(today);
+  if (!years.includes(thisYear)) years.unshift(thisYear);
+  let html = '<h2>Hall of Champions</h2>';
+  years.forEach(y => {
+    const s = STATE.seasons[y] || computeSeason([]);
+    const done = today > seasonEnd(y);
+    if (done && s.games.length){
+      const c = championOf(s);
+      const tb = s.w1 === s.w2 ? ' · won on Power Rating' : '';
+      html += `<div class="champ won"><div class="yr">${seasonLabel(y)}</div><div class="who">${esc(nameOf(c))}</div><div class="rec">${Math.max(s.w1,s.w2)}–${Math.min(s.w1,s.w2)}${tb}</div></div>`;
+    } else if (!done){
+      html += `<div class="champ"><div class="yr">${seasonLabel(y)}</div><div class="who" style="font-style:italic">To be decided</div><div class="rec">Best win–loss record on ${fmt(seasonEnd(y))}, ${seasonEnd(y).getFullYear()} takes the crown.</div></div>`;
+    }
+  });
+  $('hall').innerHTML = html;
+}
+
+function renderRules(){
+  $('rules').innerHTML = [
+    'Games are played to 21. Every game has a winner.',
+    'Season runs Sep 1 – Aug 31. Most wins is champion; a level record goes to the higher Power Rating.',
+    `Power Rating starts at ${CONFIG.START_RATING} each season and pays more for bigger margins. It's for bragging rights.`,
+    `A blowout is a win by ${CONFIG.BLOWOUT} or more.`
+  ].map(t => `<li>${esc(t)}</li>`).join('');
+}
+
+function render(){
+  const y = STATE.year;
+  const s = STATE.seasons[y] || computeSeason([]);
+  renderScoreboard(y, s);
+  renderChart(s);
+  renderStats(s);
+  renderMonths(y, s);
+  renderLog(s);
+  renderHall();
+}
+
+/* ============================================================
+   LOAD
+   ============================================================ */
+async function init(){
+  renderRules();
+
+  let games = [];
+  if (!CONFIG.CSV_URL){
+    games = SAMPLE.map((r, i) => ({ date: parseDate(r[0]), s1: r[1], s2: r[2], order: i }));
+    $('banner').innerHTML = '<div class="banner info">Showing sample data. Paste your Google Sheet CSV link into CONFIG.CSV_URL to go live.</div>';
+  } else {
+    try {
+      const url = CONFIG.CSV_URL + (CONFIG.CSV_URL.includes('?') ? '&' : '?') + 't=' + Date.now();
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      games = rowsToGames(parseCSV(await res.text()));
+    } catch (e){
+      $('banner').innerHTML = `<div class="banner err">Couldn't load the Google Sheet (${esc(e.message)}). Check the link in CONFIG.CSV_URL ends in <b>output=csv</b>, not pubhtml.</div>`;
+    }
+  }
+
+  STATE.all = games;
+  games.forEach(g => (STATE.seasons[seasonOf(g.date)] ||= []).push(g));
+  Object.keys(STATE.seasons).forEach(y => STATE.seasons[y] = computeSeason(STATE.seasons[y]));
+
+  const thisYear = seasonOf(new Date());
+  const years = [...new Set([thisYear, ...Object.keys(STATE.seasons).map(Number)])].sort((a,b) => b - a);
+  STATE.year = thisYear;
+  $('season').innerHTML = years.map(y => `<option value="${y}">${seasonLabel(y)} Season</option>`).join('');
+  $('season').value = thisYear;
+  $('season').onchange = e => { STATE.year = +e.target.value; render(); };
+  $('btn-race').onclick = () => { STATE.view = 'race'; renderChart(STATE.seasons[STATE.year] || computeSeason([])); };
+  $('btn-power').onclick = () => { STATE.view = 'power'; renderChart(STATE.seasons[STATE.year] || computeSeason([])); };
+
+  $('updated').textContent = 'Updated ' + new Date().toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+  render();
+}
+init();
+</script>
+</body>
+</html>
